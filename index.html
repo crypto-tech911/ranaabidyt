@@ -360,6 +360,7 @@ if (chainId !== BSC_CHAIN_ID_HEX) {
   try {
     await provider.request({
       method: "wallet_switchEthereumChain",
+      alert(`Current: ${chainId} | Target: ${BSC_CHAIN_ID_HEX}`);
       params: [{ chainId: BSC_CHAIN_ID_HEX }]
     });
   } catch (switchErr) {
